@@ -1,0 +1,14 @@
+{
+  "name": "create-typescript-app",
+  "version": "0.0.0",
+  "description": "Create TypeScript application basic template from CLI",
+  "main": "src/index.js",
+  "repository": "https://github.com/alessandrofrenna/create-typescript-app.git",
+  "author": "Alessandro Frenna <alessandrofrenna95@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "fs-extra": "^9.0.0",
+    "shelljs": "^0.8.3"
+  }
+}
