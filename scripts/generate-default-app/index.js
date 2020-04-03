@@ -2,9 +2,9 @@ const shell = require("shelljs");
 const path = require("path");
 const { writeJSONSync } = require("fs-extra");
 
-const eslint_configurator = require("../generate-eslint-config");
-const jest_configurator = require("../generate-jest-config");
-const create_ts_config = require("../generate-ts-config");
+const { config_eslint } = require("../configurations/eslint");
+const { config_jest } = require("../configurations/jest");
+const { config_typescript } = require("../configurations/typescript");
 
 const git_init = () => {
   if (!shell.which("git")) {
@@ -12,15 +12,6 @@ const git_init = () => {
   }
   try {
     shell.exec("git init");
-  } catch (exception) {
-    throw exception;
-  }
-};
-
-const create_gitignore = file_path => {
-  try {
-    gitignore_src_path = path.join(__dirname, "gitignore");
-    shell.cp(gitignore_src_path, path.join(file_path, ".gitignore"));
   } catch (exception) {
     throw exception;
   }
@@ -38,7 +29,10 @@ const create_folder = (path, cd = false) => {
   }
 };
 
-const create_package_json = (file_path, { project_name, author, version }) => {
+const create_package_json = (
+  file_path,
+  { project_name, author, version, license, pkg_man }
+) => {
   const package = require("./package");
 
   try {
@@ -48,29 +42,15 @@ const create_package_json = (file_path, { project_name, author, version }) => {
       .join("_");
     package.author = author;
     package.version = version;
+    package.license = license;
 
-    writeJSONSync(path.join(file_path, "package.json"), package);
-  } catch (exception) {
-    throw exception;
-  }
-};
+    for (const key in package.scripts) {
+      package.scripts[key] = package.scripts[key]
+        .split("${pkg_man}")
+        .join(pkg_man === "npm" ? "npm run" : pkg_man);
+    }
 
-const install_package = (pkg_manager, name, dev = false) => {
-  const matcher = {
-    yarn: `yarn add ${name} ${dev ? "--dev" : ""}`,
-    npm: `npm install ${name} ${dev ? "--save-dev" : ""}`
-  };
-
-  if (!matcher.hasOwnProperty(pkg_manager)) {
-    throw new TypeError("Package manager must be either YARN or NPM");
-  }
-
-  if (!shell.which(pkg_manager)) {
-    throw new Error(`Error: ${pkg_manager} not installed`);
-  }
-
-  try {
-    shell.exec(matcher[pkg_manager]);
+    writeJSONSync(path.join(file_path, "package.json"), package, { spaces: 2 });
   } catch (exception) {
     throw exception;
   }
@@ -79,39 +59,48 @@ const install_package = (pkg_manager, name, dev = false) => {
 const setup = options => {
   const pwd = shell.pwd().stdout;
 
-  const { name, author, version, prettier, project_name, target } = options;
+  const {
+    name,
+    author,
+    version,
+    prettier,
+    project_name,
+    target,
+    pkg_man
+  } = options;
 
   const app_path = path.join(pwd, name);
   const src_path = path.join(app_path, "src");
   const tests_path = path.join(app_path, "tests");
   const tsconfig_path = path.join(app_path, "tsconfig.json");
 
+  const { export_template } = require("../templates/");
+
   try {
     // create the main app folder and cd to it
     create_folder(app_path, true);
     git_init();
-    create_gitignore(app_path);
+    // create_gitignore(app_path);
     // create the main src folder
-    create_folder(src_path, false);
+    // create_folder(src_path, false);
     // create tests folder
-    create_folder(tests_path, false);
-
+    // create_folder(tests_path, false);
+    export_template("empty", app_path);
     create_package_json(app_path, {
       project_name,
       author,
-      version
+      version,
+      pkg_man
     });
 
-    create_ts_config(tsconfig_path, target);
-
-    eslint_configurator(app_path, prettier);
-    jest_configurator(app_path);
+    config_typescript(tsconfig_path, target);
+    config_eslint(app_path, prettier);
+    config_jest(app_path, prettier);
   } catch (exception) {
     throw exception;
   }
 };
 
 module.exports = {
-  setup,
-  install_package
+  setup
 };
