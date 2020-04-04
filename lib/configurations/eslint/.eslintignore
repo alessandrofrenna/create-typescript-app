@@ -1,0 +1,8 @@
+// Ignore the main node_modules  folder
+node_modules
+
+// Ignore the dist folder of compiled files
+dist
+
+// Ignore nyc coverage folder
+coverage
