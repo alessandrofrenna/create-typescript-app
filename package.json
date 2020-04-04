@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "bin": {
-    "create-ts-app": "bin/gen-ts-app"
+    "gen-ts-app": "bin/gen-ts-app"
   },
   "dependencies": {
     "chalk": "^4.0.0",
