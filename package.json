@@ -1,6 +1,6 @@
 {
   "name": "gen-ts-app",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Generate a TypeScript application with a minimal basic template from CLI",
   "main": "src/index.js",
   "repository": "https://github.com/alessandrofrenna/generate-typescript-app.git",
